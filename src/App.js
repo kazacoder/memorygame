@@ -1,32 +1,26 @@
-import "@/styles/globals.css";
-import "@/styles/_app.css";
-import '../components/Card.css'
-import config from "../config";
-import React, { useEffect } from "react";
-import Card from "@/components/Card";
+import "./styles/globals.css";
+import "./App.css";
+import './components/Card.css'
+import config from "./config";
+import React from "react";
+import Card from "./components/Card";
 import Popup from 'reactjs-popup';
-
 class App extends React.Component {
 
   constructor() {
     super();
-    this.state = {cards: [], clicks: 0, isPopupOpened: true, popup: ''};
+    this.state = {cards: [], clicks: 0, isPopupOpened: false};
 
   }
 
   componentDidMount() {
-    this.setState({
-      cards: this.prepareCards(),
-      popup: <Popup open={this.state.isPopupOpened} closeOnDocumentClick onClose={this.closePopup.bind(this)} modal>
-          <div className="modal">
-            <span className="close" onClick={this.closePopup.bind(this)}>
-              &times;
-            </span>
-            Игра завершена! Ваш результат: {this.state.clicks} кликов!
-          </div>
-        </Popup>
-    });
+    this.startGame()
+  }
 
+  startGame() {
+    this.setState({
+      cards: this.prepareCards(), clicks: 0, isPopupOpened: false
+    });
   }
 
   prepareCards() {
@@ -49,10 +43,7 @@ class App extends React.Component {
       cards: this.state.cards.map(item => {
         return item.id === openedItem.id ? {...item, isOpened: true} : item;
       }),
-      isPopupOpened: true
     }, () => {
-      console.log(this.state.cards)
-      console.log(this.state.isPopupOpened)
       this.processChoosingCards();
     });
 
@@ -95,6 +86,7 @@ class App extends React.Component {
 
   closePopup() {
     this.setState({isPopupOpened: false});
+    this.startGame()
   }
 
   render() {
@@ -116,10 +108,8 @@ class App extends React.Component {
           </div>
         </div>
 
-        {this.state.popup}
-
-        <Popup open={this.state.isPopupOpened} closeOnDocumentClick onClose={this.closePopup.bind(this)} modal>
-          <div className="modal">
+        <Popup open={this.state.isPopupOpened} closeOnDocumentClick onClose={this.closePopup.bind(this)}>
+          <div className="modal" >
             <span className="close" onClick={this.closePopup.bind(this)}>
               &times;
             </span>
