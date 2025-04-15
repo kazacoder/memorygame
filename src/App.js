@@ -10,12 +10,22 @@ class App extends React.Component {
 
   constructor() {
     super();
-    this.state = {cards: [], clicks: 0, isPopupOpened: false, seconds: 0, interval: null};
-
+    this.state = {
+      cards: [], clicks: 0, isPopupOpened: false,
+      seconds: 0, interval: null, bestTime: null, bestClicks: null
+    };
   }
 
   componentDidMount() {
     this.startGame()
+    const bestResult = localStorage.getItem('result')
+    if (bestResult) {
+      const bestResultObject = JSON.parse(bestResult)
+      this.setState({
+        bestTime: bestResultObject.time,
+        bestClicks: bestResultObject.clicks,
+      })
+    }
   }
 
   startGame() {
@@ -99,6 +109,14 @@ class App extends React.Component {
         isPopupOpened: true,
       });
       clearInterval(this.state.interval);
+
+      if (this.state.bestClicks === null || this.state.bestClicks > this.state.clicks) {
+        this.setState({
+          bestTime: this.state.seconds,
+          bestClicks: this.state.clicks,
+        });
+        localStorage.setItem('result', JSON.stringify({clicks: this.state.clicks, time: this.state.seconds}));
+      }
     }
   }
 
@@ -132,7 +150,8 @@ class App extends React.Component {
             <span className="close" onClick={this.closePopup.bind(this)}>
               &times;
             </span>
-            Игра завершена! Ваш результат: {this.state.clicks} кликов, время {this.state.seconds} секунд!
+            Игра завершена! Ваш результат: {this.state.clicks} кликов, время {this.state.seconds} секунд! <br/><br/>
+            Лучший результат: {this.state.bestClicks} кликов, время {this.state.bestTime} секунд.
           </div>
         </Popup>
 
