@@ -5,11 +5,12 @@ import config from "./config";
 import React from "react";
 import Card from "./components/Card";
 import Popup from 'reactjs-popup';
+
 class App extends React.Component {
 
   constructor() {
     super();
-    this.state = {cards: [], clicks: 0, isPopupOpened: false};
+    this.state = {cards: [], clicks: 0, isPopupOpened: false, seconds: 0, interval: null};
 
   }
 
@@ -19,8 +20,12 @@ class App extends React.Component {
 
   startGame() {
     this.setState({
-      cards: this.prepareCards(), clicks: 0, isPopupOpened: false
+      cards: this.prepareCards(),
+      clicks: 0,
+      isPopupOpened: false,
+      seconds: 0,
     });
+
   }
 
   prepareCards() {
@@ -38,7 +43,6 @@ class App extends React.Component {
       return;
     }
 
-
     this.setState({
       cards: this.state.cards.map(item => {
         return item.id === openedItem.id ? {...item, isOpened: true} : item;
@@ -47,7 +51,18 @@ class App extends React.Component {
       this.processChoosingCards();
     });
 
-    this.setState({clicks: this.state.clicks + 1});
+    if (!(openedItem.isCompleted || openedItem.isOpened)) {
+      this.setState({clicks: this.state.clicks + 1}, () => {
+        if (this.state.clicks === 1) {
+          this.setState({
+            interval: window.setInterval(() => {
+              this.setState({seconds: this.state.seconds + 1});
+            }, 1000)
+          })
+        }
+      });
+
+    }
   }
 
   processChoosingCards() {
@@ -80,7 +95,10 @@ class App extends React.Component {
 
   checkForAllCompleted() {
     if (this.state.cards.every(item => item.isCompleted)) {
-      this.setState({isPopupOpened: true});
+      this.setState({
+        isPopupOpened: true,
+      });
+      clearInterval(this.state.interval);
     }
   }
 
@@ -96,7 +114,8 @@ class App extends React.Component {
         <header className="header">Memory game</header>
         <div className="game">
           <div className="score">
-            Нажатий: {this.state.clicks}
+            <span>Нажатий: {this.state.clicks} </span>
+            <span>Время: {this.state.seconds}</span>
           </div>
           <div className="cards">
             {
@@ -109,11 +128,11 @@ class App extends React.Component {
         </div>
 
         <Popup open={this.state.isPopupOpened} closeOnDocumentClick onClose={this.closePopup.bind(this)}>
-          <div className="modal" >
+          <div className="modal">
             <span className="close" onClick={this.closePopup.bind(this)}>
               &times;
             </span>
-            Игра завершена! Ваш результат: {this.state.clicks} кликов!
+            Игра завершена! Ваш результат: {this.state.clicks} кликов, время {this.state.seconds} секунд!
           </div>
         </Popup>
 
